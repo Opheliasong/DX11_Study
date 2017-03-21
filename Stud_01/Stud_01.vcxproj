@@ -142,6 +142,7 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
+    <ClCompile Include="Colorshaderclass.cpp" />
     <ClCompile Include="D3DClass.cpp" />
     <ClCompile Include="Graphicsclass.cpp" />
     <ClCompile Include="inputclass.cpp" />
@@ -149,10 +150,19 @@
     <ClCompile Include="systemclass.cpp" />
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="Colorshaderclass.h" />
     <ClInclude Include="D3DClass.h" />
     <ClInclude Include="Graphicsclass.h" />
     <ClInclude Include="inputclass.h" />
     <ClInclude Include="systemclass.h" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="color.vs">
+      <FileType>Document</FileType>
+    </None>
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="color.ps" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">

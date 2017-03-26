@@ -142,18 +142,22 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
+    <ClCompile Include="CameraClass.cpp" />
     <ClCompile Include="Colorshaderclass.cpp" />
     <ClCompile Include="D3DClass.cpp" />
     <ClCompile Include="Graphicsclass.cpp" />
     <ClCompile Include="inputclass.cpp" />
     <ClCompile Include="main.cpp" />
+    <ClCompile Include="ModelClass.cpp" />
     <ClCompile Include="systemclass.cpp" />
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="CameraClass.h" />
     <ClInclude Include="Colorshaderclass.h" />
     <ClInclude Include="D3DClass.h" />
     <ClInclude Include="Graphicsclass.h" />
     <ClInclude Include="inputclass.h" />
+    <ClInclude Include="ModelClass.h" />
     <ClInclude Include="systemclass.h" />
   </ItemGroup>
   <ItemGroup>

@@ -148,7 +148,8 @@ bool ColorShaderClass::InitializeShader(ID3D11Device* device, HWND hwnd, WCHAR* 
 
 	// Create the vertex input layout.
 	retVal = device->CreateInputLayout(polygonLayout, numElements, vertexShaderBuffer->GetBufferPointer(),
-		vertexShaderBuffer->GetBufferSize(), &m_layout);
+										vertexShaderBuffer->GetBufferSize(), &m_layout);
+
 	if (FAILED(retVal))
 	{
 		return false;

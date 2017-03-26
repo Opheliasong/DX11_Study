@@ -1,3 +1,6 @@
 .vs/
 x64/
 *.tlog
+*.opendb
+*.db
+*.VC.db

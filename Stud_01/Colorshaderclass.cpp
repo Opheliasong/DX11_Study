@@ -26,7 +26,7 @@ bool ColorShaderClass::Initialize(ID3D11Device* device, HWND hwnd)
 	{
 		return false;
 	}
-	return false;
+	return true;
 }
 
 void ColorShaderClass::Shutdown()
@@ -176,5 +176,125 @@ bool ColorShaderClass::InitializeShader(ID3D11Device* device, HWND hwnd, WCHAR* 
 		return false;
 	}
 
-	return false;
+	return true;
+}
+
+void ColorShaderClass::ShutdownShader()
+{
+	//Release the matrix constant buffer.
+	if (m_matrixBuffer)
+	{
+		m_matrixBuffer->Release();
+		m_matrixBuffer = 0;
+	}
+
+	//Release the layout.
+	if (m_layout)
+	{
+		m_layout->Release();
+		m_layout = 0;
+	}
+
+	//Release the pixel shader.
+	if (m_pixelShader)
+	{
+		m_pixelShader->Release();
+		m_pixelShader = 0;
+	}
+
+	//Release the vertex shader.
+	if (m_vertexShader)
+	{
+		m_vertexShader->Release();
+		m_vertexShader = 0;
+	}
+	return;
+}
+
+void ColorShaderClass::OutputShaderErrorMessage(ID3D10Blob* errMessage, HWND hwnd, WCHAR* shaderFileName)
+{
+	char* compileErrors;
+	unsigned long long bufferSize, i;
+	ofstream fout;
+
+	//Get a pointer to the error message text buffer.
+	compileErrors = (char*)(errMessage->GetBufferPointer());
+
+	//Get the length of the message.
+	bufferSize = errMessage->GetBufferSize();
+
+	//Open a file to write the error message to.
+	fout.open("shader_error.txt");
+
+	//Write out the error message.
+	for (i = 0; i < bufferSize; i++)
+	{
+		fout << compileErrors[i];
+	}
+
+	//Close the file.
+	fout.close();
+
+	//Release the error message.
+	errMessage->Release();
+	errMessage = 0;
+
+	//Pop a message up on the screen to notify the user to check the text file for compile errors.
+	MessageBox(hwnd, L"Error compilling shader. Check shader-error.txt for message.", shaderFileName, MB_OK);
+
+	return;
+}
+
+bool ColorShaderClass::SetShaderParameters(ID3D11DeviceContext* deviceContext, XMMATRIX worldMatrix, XMMATRIX viewMatrix, XMMATRIX projMatrix)
+{
+	HRESULT retVal;
+	D3D11_MAPPED_SUBRESOURCE mappedResource;
+	MatrixBufferType* dataPtr;
+	unsigned int bufferNumber;
+
+	//Transpose the matrices to prepare them for the shader.
+	worldMatrix = XMMatrixTranspose(worldMatrix);
+	viewMatrix = XMMatrixTranspose(viewMatrix);
+	projMatrix = XMMatrixTranspose(projMatrix);
+
+	//Lock the constant buffer so it can be written to.
+	retVal = deviceContext->Map(m_matrixBuffer, 0, D3D11_MAP_WRITE_DISCARD, 0, &mappedResource);
+	if (FAILED(retVal))
+	{
+		return false;
+	}
+
+	//Get a pointer to the data in the constant buffer.
+	dataPtr = (MatrixBufferType*)mappedResource.pData;
+
+	//Copy the matrices into the constant buffer.
+	dataPtr->world = worldMatrix;
+	dataPtr->view = viewMatrix;
+	dataPtr->projection = projMatrix;
+
+	//Unlock the constant buffer.
+	deviceContext->Unmap(m_matrixBuffer, 0);
+
+	//Set the position of the constant buffer in the vertex shader.
+	bufferNumber = 0;
+
+	//Finaly set the constant buffer in the vertex shader with the updated values.
+	deviceContext->VSSetConstantBuffers(bufferNumber, 1, &m_matrixBuffer);
+
+	return true;
+}
+
+void ColorShaderClass::RenderShader(ID3D11DeviceContext* deviceContext, int indexCount)
+{
+	//Set the vertex input layout
+	deviceContext->IASetInputLayout(m_layout);
+
+	//Set the vertex and pixel shader that will be used to render this triangle.
+	deviceContext->VSSetShader(m_vertexShader, NULL, 0);
+	deviceContext->PSSetShader(m_pixelShader, NULL, 0);
+
+	//Render the triangle.
+	deviceContext->DrawIndexed(indexCount, 0, 0);
+
+	return;
 }

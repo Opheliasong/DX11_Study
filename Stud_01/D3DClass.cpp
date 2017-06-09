@@ -482,4 +482,3 @@ void D3DClass::GetVideoCardInfo(char * cardName, int & memory)
 	memory = m_videoCardMemory;
 	return;
 }
-

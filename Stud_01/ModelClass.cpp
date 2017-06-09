@@ -17,25 +17,33 @@ ModelClass::~ModelClass()
 {
 }
 
-bool ModelClass::Initialize(ID3D11Device * device)
+bool ModelClass::Initialize(ID3D11Device* device, ID3D11DeviceContext* deviceContext, char* textureFilename)
 {
 	bool retVal;
 
-	//Initialize the vertex and index buffers.
+	//버텍스와 인덱스 버퍼를 초기화 한다.
 	retVal = InitializeBuffers(device);
 	if (!retVal)
 	{
 		return false;
 	}
 
+	//모델을 위한 텍스쳐를 로드한다.
+	retVal = LoadTexture(device, deviceContext, textureFilename);
+	if (!retVal)
+	{
+		return false;
+	}
 	return true;
 }
 
 void ModelClass::Shutdown()
 {
-	//Shutdown the vertex and index buffers.
-	ShutdownBuffers();
+	//모델의 텍스처를 해제한다.
+	ReleaseTexture();
 
+	//버텍스와 인덱스 버퍼를 해제한다.
+	ShutdownBuffers();
 	return;
 }
 
@@ -50,6 +58,11 @@ void ModelClass::Render(ID3D11DeviceContext* deviceContext)
 int ModelClass::GetIndexCount()
 {
 	return m_indexCount;
+}
+
+ID3D11ShaderResourceView * ModelClass::GetTexture()
+{
+	return m_Texture->GetTexture();
 }
 
 bool ModelClass::InitializeBuffers(ID3D11Device* device)
@@ -83,13 +96,13 @@ bool ModelClass::InitializeBuffers(ID3D11Device* device)
 	//Fill the vertex and index array!!
 	//Load the vertex arrray with data.
 	vertices[0].position = XMFLOAT3(-1.0f, -1.0f, 0.0f);	//Bottom left.
-	vertices[0].color = XMFLOAT4(0.0f, 1.0f, 0.0f, 1.0f);
+	vertices[0].texture = XMFLOAT2(0.0f, 1.0f);
 
 	vertices[1].position = XMFLOAT3(0.0f, 1.0f, 0.0f);		//Top middle.
-	vertices[1].color = XMFLOAT4(0.0f, 1.0f, 0.0f, 1.0f);
+	vertices[1].texture = XMFLOAT2(0.5f, 0.0f);
 
 	vertices[2].position = XMFLOAT3(1.0f, -1.0f, 0.0f);		//Bottom right
-	vertices[2].color = XMFLOAT4(0.0f, 1.0f, 0.0f, 1.0f);
+	vertices[2].texture = XMFLOAT2(1.0f, 1.0f);
 
 	//Load the index array with data
 	indices[0] = 0;	//Bottom left.
@@ -110,7 +123,7 @@ bool ModelClass::InitializeBuffers(ID3D11Device* device)
 	vertexData.SysMemSlicePitch = 0;
 
 	//Now create the vertex buffer.
-	retval = device->CreateBuffer(&vertexBufferDesc, &vertexData, &m_vertexBuffer);
+	retval = device->CreateBuffer(&vertexBufferDesc, &vertexData, OUT &m_vertexBuffer);
 	if(FAILED(retval))
 	{
 		return false;
@@ -183,5 +196,33 @@ void ModelClass::RenderBuffers(ID3D11DeviceContext* deviceContext)
 	//in this case triangles.
 	deviceContext->IASetPrimitiveTopology(D3D11_PRIMITIVE_TOPOLOGY_TRIANGLELIST);
 
+	return;
+}
+
+bool ModelClass::LoadTexture(ID3D11Device * device, ID3D11DeviceContext * deviceContext, char * fileName)
+{
+	bool retVal;
+
+	//텍스처 오브젝트 생성
+	m_Texture = new TextureClass;
+
+	//텍스처 오브젝트 초기화
+	retVal = m_Texture->Initialize(device, deviceContext, fileName);
+	if (!retVal)
+	{
+		return false;
+	}
+	
+	return true;
+}
+
+void ModelClass::ReleaseTexture()
+{
+	if (m_Texture)
+	{
+		m_Texture->Shutdown();
+		delete m_Texture;
+		m_Texture = 0;
+	}
 	return;
 }

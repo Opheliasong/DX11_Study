@@ -109,7 +109,7 @@ bool ColorShaderClass::InitializeShader(ID3D11Device* device, HWND hwnd, WCHAR* 
 		return false;
 	}
 
-	// Create the vertex shader from the buffer.
+	//버퍼로부터 버텍스 쉐이더를 제작한다.
 	retVal = device->CreateVertexShader(vertexShaderBuffer->GetBufferPointer(),
 										vertexShaderBuffer->GetBufferSize(), NULL, &m_vertexShader);
 	if (FAILED(retVal))
@@ -117,7 +117,7 @@ bool ColorShaderClass::InitializeShader(ID3D11Device* device, HWND hwnd, WCHAR* 
 		return false;
 	}
 
-	// Create the pixel shader from the buffer.
+	// 버퍼로부터 픽셀 쉐이더를 제작한다.
 	retVal = device->CreatePixelShader(pixelShaderBuffer->GetBufferPointer(), 
 										pixelShaderBuffer->GetBufferSize(), NULL, &m_pixelShader);
 	if (FAILED(retVal))
@@ -125,8 +125,8 @@ bool ColorShaderClass::InitializeShader(ID3D11Device* device, HWND hwnd, WCHAR* 
 		return false;
 	}
 
-	// Create the vertex input layout description.
-	// This setup needs to match the VertexType stucture in the ModelClass and in the shader.
+	// 버텍스 입력 형태 설명서를 제작한다.
+	// 버텍스 타입 구조가 ModelClass 와 shaer와 일치해야 한다.
 	polygonLayout[0].SemanticName = "POSITION";
 	polygonLayout[0].SemanticIndex = 0;
 	polygonLayout[0].Format = DXGI_FORMAT_R32G32B32_FLOAT;
@@ -143,19 +143,18 @@ bool ColorShaderClass::InitializeShader(ID3D11Device* device, HWND hwnd, WCHAR* 
 	polygonLayout[1].InputSlotClass = D3D11_INPUT_PER_VERTEX_DATA;
 	polygonLayout[1].InstanceDataStepRate = 0;
 
-	// Get a count of the elements in the layout.
+	// 폴리곤 구조의 갯수를 계산한다.
 	numElements = sizeof(polygonLayout) / sizeof(polygonLayout[0]);
 
-	// Create the vertex input layout.
-	retVal = device->CreateInputLayout(polygonLayout, numElements, vertexShaderBuffer->GetBufferPointer(),
-										vertexShaderBuffer->GetBufferSize(), &m_layout);
+	// 버텍스 입력 구조를 생성한다.
+	retVal = device->CreateInputLayout(polygonLayout, numElements, vertexShaderBuffer->GetBufferPointer(), vertexShaderBuffer->GetBufferSize(), &m_layout);
 
 	if (FAILED(retVal))
 	{
 		return false;
 	}
 
-	//Release the vertex shader buffer and pixel shader buffer since they are no longer needed.
+	//버텍스 쉐이더 버퍼와 픽셀 쉐이더 버퍼는 이제 더이상 사용하지 않으므로 해제한다.
 	vertexShaderBuffer->Release();
 	vertexShaderBuffer = 0;
 
@@ -212,40 +211,6 @@ void ColorShaderClass::ShutdownShader()
 	return;
 }
 
-void ColorShaderClass::OutputShaderErrorMessage(ID3D10Blob* errMessage, HWND hwnd, WCHAR* shaderFileName)
-{
-	char* compileErrors;
-	unsigned long long bufferSize, i;
-	ofstream fout;
-
-	//Get a pointer to the error message text buffer.
-	compileErrors = (char*)(errMessage->GetBufferPointer());
-
-	//Get the length of the message.
-	bufferSize = errMessage->GetBufferSize();
-
-	//Open a file to write the error message to.
-	fout.open("shader_error.txt");
-
-	//Write out the error message.
-	for (i = 0; i < bufferSize; i++)
-	{
-		fout << compileErrors[i];
-	}
-
-	//Close the file.
-	fout.close();
-
-	//Release the error message.
-	errMessage->Release();
-	errMessage = 0;
-
-	//Pop a message up on the screen to notify the user to check the text file for compile errors.
-	MessageBox(hwnd, L"Error compilling shader. Check shader-error.txt for message.", shaderFileName, MB_OK);
-
-	return;
-}
-
 bool ColorShaderClass::SetShaderParameters(ID3D11DeviceContext* deviceContext, XMMATRIX worldMatrix, XMMATRIX viewMatrix, XMMATRIX projMatrix)
 {
 	HRESULT retVal;
@@ -253,33 +218,32 @@ bool ColorShaderClass::SetShaderParameters(ID3D11DeviceContext* deviceContext, X
 	MatrixBufferType* dataPtr;
 	unsigned int bufferNumber;
 
-	//Transpose the matrices to prepare them for the shader.
+	//각 메트릭스들을 변환한다.
 	worldMatrix = XMMatrixTranspose(worldMatrix);
 	viewMatrix = XMMatrixTranspose(viewMatrix);
 	projMatrix = XMMatrixTranspose(projMatrix);
 
-	//Lock the constant buffer so it can be written to.
-	retVal = deviceContext->Map(m_matrixBuffer, 0, D3D11_MAP_WRITE_DISCARD, 0, &mappedResource);
+	//우선 버퍼에 쓰기 위해 lock을 한다.
+	retVal = deviceContext->Map(m_matrixBuffer, 0, D3D11_MAP_WRITE_DISCARD, 0,OUT &mappedResource);
 	if (FAILED(retVal))
 	{
 		return false;
 	}
 
-	//Get a pointer to the data in the constant buffer.
+	//버퍼내부에 접근하기 위해 포인터를 가져온다.
 	dataPtr = (MatrixBufferType*)mappedResource.pData;
 
-	//Copy the matrices into the constant buffer.
+	//버퍼에 변환된 매트릭스들을 입력한다.
 	dataPtr->world = worldMatrix;
 	dataPtr->view = viewMatrix;
 	dataPtr->projection = projMatrix;
 
-	//Unlock the constant buffer.
+	//버퍼를 Unlock 한다.
 	deviceContext->Unmap(m_matrixBuffer, 0);
 
-	//Set the position of the constant buffer in the vertex shader.
 	bufferNumber = 0;
-
-	//Finaly set the constant buffer in the vertex shader with the updated values.
+		
+	//마지막으로 갱신된 값을 가진 버퍼를 버텍스 쉐이더에 넘겨준다.
 	deviceContext->VSSetConstantBuffers(bufferNumber, 1, &m_matrixBuffer);
 
 	return true;
@@ -287,10 +251,11 @@ bool ColorShaderClass::SetShaderParameters(ID3D11DeviceContext* deviceContext, X
 
 void ColorShaderClass::RenderShader(ID3D11DeviceContext* deviceContext, int indexCount)
 {
-	//Set the vertex input layout
+	//인풋 레이아웃을 설정한다.
 	deviceContext->IASetInputLayout(m_layout);
 
 	//Set the vertex and pixel shader that will be used to render this triangle.
+	//버텍스 & 픽셀 쉐이더의 삼각형을 그리기 위해 사용한
 	deviceContext->VSSetShader(m_vertexShader, NULL, 0);
 	deviceContext->PSSetShader(m_pixelShader, NULL, 0);
 

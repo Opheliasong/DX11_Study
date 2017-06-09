@@ -1,10 +1,7 @@
 #pragma once
 /////////////////////////
 // Filename: Colorshaderclass.h
-/////////////////////////\
-
-#ifndef _COLORSHADERCLASS_H_
-#define _COLORSHADERCLASS_H_
+/////////////////////////
 
 ////////////////////
 // Includes
@@ -13,13 +10,14 @@
 #include <d3dcompiler.h>
 #include <DirectXMath.h>
 #include<fstream>
+#include "ErrorExportClass.h"
 using namespace DirectX;
 using namespace std;
 
 ////////////////////
 //Class name: ColorShaderClass
 ////////////////////
-class ColorShaderClass
+class ColorShaderClass : public ShaderErrorExportClass
 {
 private:
 	struct MatrixBufferType
@@ -41,7 +39,7 @@ public:
 private:
 	bool InitializeShader(ID3D11Device*, HWND, WCHAR*, WCHAR*);
 	void ShutdownShader();
-	void OutputShaderErrorMessage(ID3D10Blob*, HWND, WCHAR*);
+	//void OutputShaderErrorMessage(ID3D10Blob*, HWND, WCHAR*);
 
 	bool SetShaderParameters(ID3D11DeviceContext*, XMMATRIX, XMMATRIX, XMMATRIX);
 	void RenderShader(ID3D11DeviceContext*, int);
@@ -52,5 +50,3 @@ private:
 	ID3D11InputLayout* m_layout;
 	ID3D11Buffer* m_matrixBuffer;
 };
-
-#endif // !_COLORSHADERCLASS_H_

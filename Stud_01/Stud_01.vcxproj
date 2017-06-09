@@ -150,20 +150,28 @@
     <ClCompile Include="main.cpp" />
     <ClCompile Include="ModelClass.cpp" />
     <ClCompile Include="systemclass.cpp" />
+    <ClCompile Include="TextureClass.cpp" />
+    <ClCompile Include="TextureShaderClass.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="CameraClass.h" />
     <ClInclude Include="Colorshaderclass.h" />
     <ClInclude Include="D3DClass.h" />
+    <ClInclude Include="ErrorExportClass.h" />
     <ClInclude Include="Graphicsclass.h" />
     <ClInclude Include="inputclass.h" />
     <ClInclude Include="ModelClass.h" />
     <ClInclude Include="systemclass.h" />
+    <ClInclude Include="TextureClass.h" />
+    <ClInclude Include="TextureShaderClass.h" />
+    <ClInclude Include="Util.h" />
   </ItemGroup>
   <ItemGroup>
     <None Include="color.vs">
       <FileType>Document</FileType>
     </None>
+    <None Include="Texture.ps" />
+    <None Include="Texture.vs" />
   </ItemGroup>
   <ItemGroup>
     <None Include="color.ps" />

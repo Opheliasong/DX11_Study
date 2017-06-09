@@ -3,8 +3,6 @@
 ////////////////////////////////////////////////////////////////////////////////
 // Filename: graphicsclass.h
 ////////////////////////////////////////////////////////////////////////////////
-#ifndef _GRAPHICSCLASS_H_
-#define _GRAPHICSCLASS_H_
 
 /////////////
 //INCLUDE
@@ -14,6 +12,7 @@
 #include "CameraClass.h"
 #include "ModelClass.h"
 #include "Colorshaderclass.h"
+#include "TextureShaderClass.h"
 
 /////////////
 // GLOBALS //
@@ -44,8 +43,6 @@ private:
 private:
 	D3DClass* m_Direct3D;
 	CameraClass* m_Camera;
-	ModelClass* m_Model;
-	ColorShaderClass* m_ColorShader;
+	ModelClass* m_Model;	
+	TextureShaderClass* m_TextureShader;
 };
-
-#endif

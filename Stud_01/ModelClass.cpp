@@ -74,10 +74,10 @@ bool ModelClass::InitializeBuffers(ID3D11Device* device)
 	HRESULT retval;
 
 	//Set the number of vertices in the vertex array.
-	m_vertexCount = 3; 
+	m_vertexCount = 4; 
 
 	//Set the number of indicies in the index array.
-	m_indexCount = 3;
+	m_indexCount = 6;
 
 	//Crate the vertex array.
 	vertices = new VertexType[m_vertexCount];
@@ -97,19 +97,30 @@ bool ModelClass::InitializeBuffers(ID3D11Device* device)
 	//Load the vertex arrray with data.
 	vertices[0].position = XMFLOAT3(-1.0f, -1.0f, 0.0f);	//Bottom left.
 	vertices[0].texture = XMFLOAT2(0.0f, 1.0f);
+	vertices[0].normal = XMFLOAT3(0.0f, 0.0f, -1.0f);
 
 	vertices[1].position = XMFLOAT3(0.0f, 1.0f, 0.0f);		//Top middle.
 	vertices[1].texture = XMFLOAT2(0.5f, 0.0f);
+	vertices[1].normal = XMFLOAT3(0.0f, 0.0f, -1.0f);
 
 	vertices[2].position = XMFLOAT3(1.0f, -1.0f, 0.0f);		//Bottom right
 	vertices[2].texture = XMFLOAT2(1.0f, 1.0f);
+	vertices[2].normal = XMFLOAT3(0.0f, 0.0f, -1.0f);
+
+	vertices[3].position = XMFLOAT3(2.0f, 1.0f, 0.0f);
+	vertices[3].texture = XMFLOAT2(0.0f, 1.0f);
+	vertices[3].normal = XMFLOAT3(0.0f, 0.0f, -1.0f);
 
 	//Load the index array with data
 	indices[0] = 0;	//Bottom left.
 	indices[1] = 1;	//Top middle.
 	indices[2] = 2;	//Bottom right
+	indices[3] = 1; //Top middle 
+	indices[4] = 3; //new Top right.
+	indices[5] = 2; //Bottom right
 
-	//Set up the description of the static vertex buffer.
+
+	//정적 버텍스 버퍼의 description을 설정한다.
 	vertexBufferDesc.Usage = D3D11_USAGE_DEFAULT;
 	vertexBufferDesc.ByteWidth = sizeof(VertexType)* m_vertexCount;
 	vertexBufferDesc.BindFlags = D3D11_BIND_VERTEX_BUFFER;
@@ -117,12 +128,11 @@ bool ModelClass::InitializeBuffers(ID3D11Device* device)
 	vertexBufferDesc.MiscFlags = 0;
 	vertexBufferDesc.StructureByteStride = 0;
 
-	//Give the subresource structure a pointer to the vertex data.
 	vertexData.pSysMem = vertices;
 	vertexData.SysMemPitch = 0;
 	vertexData.SysMemSlicePitch = 0;
 
-	//Now create the vertex buffer.
+	//버텍스 버퍼를 생성한다.
 	retval = device->CreateBuffer(&vertexBufferDesc, &vertexData, OUT &m_vertexBuffer);
 	if(FAILED(retval))
 	{

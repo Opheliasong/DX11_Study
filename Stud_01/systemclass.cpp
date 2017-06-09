@@ -97,20 +97,20 @@ void SystemClass::Run()
 		{
 			TranslateMessage(&msg);
 			DispatchMessage(&msg);
+		}
 
-			//If windows signals to end the application then exit out.
-			if (msg.message == WM_QUIT)
+		//If windows signals to end the application then exit out.
+		if (msg.message == WM_QUIT)
+		{
+			done = true;
+		}
+		else
+		{
+			//Otherwise do the frame processing
+			result = Frame();
+			if (!result)
 			{
 				done = true;
-			}
-			else
-			{
-				//Otherwise do the frame processing
-				result = Frame();
-				if (!result)
-				{
-					done = true;
-				}
 			}
 		}
 	}

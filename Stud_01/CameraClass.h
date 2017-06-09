@@ -1,6 +1,4 @@
-#ifndef _CAMERACLASS_H_
-#define _CAMERACLASS_H_
-
+#pragma once
 /////////////////////////////////////
 //Filename : CameraClass.h
 /////////////////////////////////////
@@ -36,5 +34,3 @@ private:
 	float m_RotationX, m_RotationY, m_RotationZ;
 	XMMATRIX m_viewMatrix;
 };
-
-#endif // _CAMERACLASS_H_

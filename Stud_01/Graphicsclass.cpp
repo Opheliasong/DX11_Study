@@ -6,6 +6,8 @@ GraphicsClass::GraphicsClass()
 	m_Camera = 0;
 	m_Model = 0;
 	m_TextureShader = 0;
+	m_LightShader = 0;
+	m_Light = 0;
 }
 
 GraphicsClass::GraphicsClass(const GraphicsClass &other)
@@ -71,30 +73,57 @@ bool GraphicsClass::Initialize(int screenWidth, int screenHeight, HWND hwnd)
 	retVal = m_TextureShader->Initialize(m_Direct3D->GetDevice(), hwnd);
 	if (!retVal)
 	{
-		MessageBox(hwnd, L"Could not initialize the color shader object.", L"Error", MB_OK);
+		MessageBox(hwnd, L"Could not initialize the Texture shader object.", L"Error", MB_OK);
 		return false;
 	}
-	//return
+
+	//라이트 쉐이더 오브젝트를 생성한다.
+	m_LightShader = new LightShaderClass();
+	if (!m_LightShader)
+	{
+		return false;
+	}
+
+	//라이트 쉐이더 오브젝트를 초기화를 한다.
+	retVal = m_LightShader->initilaize(m_Direct3D->GetDevice(), hwnd);
+	if (!retVal)
+	{
+		MessageBox(hwnd, L"Could not initialize the Light shader object.", L"Error", MB_OK);
+		return false;
+	}
+
+	//라이트 오브젝트를 생성한다.
+	m_Light = new LightClass;
+	if (!m_Light)
+	{
+		return false;
+	}
+
+	//라이트 오브젝트 초기화
+	m_Light->SetDiffuseColor(0.5f, 1.0f, 0.5f, 1.0f);
+	m_Light->SetDirection(0.0f, 0.0f, 1.0f);
+
+	//return!
 	return true;
 }
 
 void GraphicsClass::Shutdown()
 {
-	// Release the color shader object.
-	if (m_TextureShader)
+	if (m_Light)
 	{
-		m_TextureShader->Shutdown();
-		delete m_TextureShader;
-		m_TextureShader = 0;
+		delete m_Light;
+		m_Light = 0;
 	}
+	SHUTDOWN_AND_DELETE(m_LightShader);
 
 	// Release the model object.
-	if (m_Model)
+	/*if (m_Model)
 	{
 		m_Model->Shutdown();
 		delete m_Model;
 		m_Model = 0;
-	}
+	}*/
+	SHUTDOWN_AND_DELETE(m_Model);
 
 	// Release the camera object.
 	if (m_Camera)
@@ -104,21 +133,31 @@ void GraphicsClass::Shutdown()
 	}
 	
 	//Release the Direct3D object
-	if (m_Direct3D)
+	/*if (m_Direct3D)
 	{
 		m_Direct3D->Shutdown();
 		delete m_Direct3D;
 		m_Direct3D = 0;
-	}
+	}*/
+	SHUTDOWN_AND_DELETE(m_Direct3D);
+
 	return;
 }
 
 bool GraphicsClass::Frame()
 {
+	static float rotation = 0.0f;
+
+	rotation += (float)XM_PI * 0.01f;
+	if (rotation > 90.0f)
+	{
+		rotation -= 90.0f;
+	}
+
 	bool retVal;
 
 	//Render the graphics scene.
-	retVal = Render();
+	retVal = Render(rotation);
 	if (!retVal)
 	{
 		return false;
@@ -126,7 +165,7 @@ bool GraphicsClass::Frame()
 	return true;
 }
 
-bool GraphicsClass::Render()
+bool GraphicsClass::Render(float rotation)
 {
 	XMMATRIX worldMatrix, viewMatrix, projectionMatrix;
 	bool result;
@@ -143,11 +182,16 @@ bool GraphicsClass::Render()
 	m_Camera->GetViewMatrix(viewMatrix);
 	m_Direct3D->GetProjectionMatrix(projectionMatrix);
 
+	worldMatrix = XMMatrixRotationX(rotation) * worldMatrix;
+
 	// Put the model vertex and index buffers on the graphics pipeline to prepare them for drawing.
 	m_Model->Render(m_Direct3D->GetDeviceContext());
 
 	// Render the model using the color shader.
-	result = m_TextureShader->Render(m_Direct3D->GetDeviceContext(), m_Model->GetIndexCount(), worldMatrix, viewMatrix, projectionMatrix, m_Model->GetTexture());
+	result = m_LightShader->Render(m_Direct3D->GetDeviceContext(), m_Model->GetIndexCount(), 
+		worldMatrix, viewMatrix, projectionMatrix, 
+		m_Model->GetTexture(), m_Light->GetDirection(), m_Light->GetDiffuseColor());
+
 	if (!result)
 	{
 		return false;

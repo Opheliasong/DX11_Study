@@ -18,8 +18,6 @@ using namespace std;
 /////////////////////////////////////
 //Class Name : TextureShaderClass
 /////////////////////////////////////
-
-
 class TextureShaderClass : public ShaderErrorExportClass
 {
 private:
